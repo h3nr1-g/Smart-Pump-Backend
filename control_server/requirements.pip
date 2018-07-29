@@ -1,0 +1,7 @@
+coverage==4.5.1
+Django==2.0.7
+django-bootstrap4==0.0.6
+django-tables2==1.21.2
+django-webtest==1.9.3
+djangorestframework==3.8.2
+pytest==3.6.4
