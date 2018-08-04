@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
-from pcs.settings import LOW_RESOURCE_THRESHHOLD
+from spb.settings.common import LOW_RESOURCE_THRESHHOLD
 
 LOW_BATTERY_SERVICE_TASK = 'Recharge/Replace Battery'
 LOW_WATER_SERVICE_TASK = 'Refill Water'
