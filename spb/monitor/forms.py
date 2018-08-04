@@ -22,7 +22,7 @@ class PumpModelForm(forms.ModelForm):
         label='Description',
         widget=forms.Textarea(
             attrs={
-                'rows':2,
+                'rows': 2,
             }
         ),
         required=False,
@@ -100,7 +100,8 @@ class PumpModelForm(forms.ModelForm):
             return False
 
         if self.cleaned_data['remainingTankVolume'] > self.cleaned_data['maxTankVolume']:
-            self._errors['remainingTankVolume'] = ['Remaining water volume can not be greater than maximal water volume']
+            self._errors['remainingTankVolume'] = [
+                'Remaining water volume can not be greater than maximal water volume']
             return False
 
         if self.cleaned_data['remainingBatteryCapacity'] > self.cleaned_data['maxBatteryCapacity']:
@@ -108,4 +109,3 @@ class PumpModelForm(forms.ModelForm):
             return False
 
         return True
-

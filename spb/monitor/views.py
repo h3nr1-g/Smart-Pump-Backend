@@ -1,9 +1,9 @@
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest, JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render, get_object_or_404
 from django.template import loader
 from django.urls import reverse
 from django.views import View
-from api.models import Pump, ServiceTask, TransmittedTiming
+from api.models import Pump, ServiceTask
 from monitor.forms import PumpModelForm
 from monitor.tables import PumpTable
 
@@ -81,9 +81,9 @@ class PumpDetailsView(View):
             context['success_notification'] = 'Changes saved.'
             form.save()
             return render(request, 'monitor/pump_details.html', context)
-        else:
-            template = loader.get_template('monitor/pump_details.html')
-            return HttpResponseBadRequest(template.render(context, request))
+
+        template = loader.get_template('monitor/pump_details.html')
+        return HttpResponseBadRequest(template.render(context, request))
 
 
 class NewPumpView(View):
@@ -116,6 +116,6 @@ class NewPumpView(View):
         if form.is_valid():
             pump = form.save()
             return HttpResponseRedirect(reverse('monitor:pump_details', args=[pump.id]))
-        else:
-            template = loader.get_template('monitor/pump_details.html')
-            return HttpResponseBadRequest(template.render({'form': form}, request))
+
+        template = loader.get_template('monitor/pump_details.html')
+        return HttpResponseBadRequest(template.render({'form': form}, request))
