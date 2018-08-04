@@ -1,7 +1,0 @@
--r productive.pip
-coverage
-django-webtest
-pytest
-django-jenkins
-flake8
-pylint
