@@ -18,6 +18,8 @@ DATABASES = {
     }
 }
 
+INSTALLED_APPS += ['django_jenkins']
+
 # django jenkins configuration / task list
 JENKINS_TASKS = (
     'django_jenkins.tasks.run_pep8',
