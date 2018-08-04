@@ -33,6 +33,6 @@ git clone https://github.com/h3nr1-g/Smart-Pump-Backend.git
 cd Smart-Pump-Backend
 pip install -r pip/dev.pip
 cd spb
-python manage.py makemigrations api monitor && python migrate
+python manage.py makemigrations --settings=spb.settings.dev api monitor && python migrate
 python manage.py test --settings=spb.settings.dev && python manage.py runserver --settings=spb.settings.dev
 ```
