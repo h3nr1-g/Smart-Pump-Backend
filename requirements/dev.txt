@@ -1,4 +1,4 @@
--r productive.pip
+-r productive.txt
 coverage
 django-webtest
 pytest
