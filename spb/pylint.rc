@@ -1,6 +1,6 @@
 [MASTER]
 persistent=yes
-ignore=apps.py,tests.py,settings
+ignore=apps.py,settings
 cache-size=500
 
 [MESSAGES CONTROL]

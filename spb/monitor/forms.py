@@ -37,13 +37,13 @@ class PumpModelForm(forms.ModelForm):
         initial=10,
         min_value=0
     )
-    remainingTankVolume = forms.FloatField(
-        label='Remain Water Tank Volume [l]',
+    remainingContainerVolume = forms.FloatField(
+        label='Remain Water Container Volume [l]',
         initial=2.0,
         min_value=0,
     )
-    maxTankVolume = forms.FloatField(
-        label='Max Water Tank Volume [l]',
+    maxContainerVolume = forms.FloatField(
+        label='Max Water Container Volume [l]',
         initial=2.0,
         min_value=0,
     )
@@ -86,7 +86,8 @@ class PumpModelForm(forms.ModelForm):
 
     class Meta:
         model = Pump
-        fields = ('name', 'description', 'active', 'sleepTime', 'activeTime', 'maxTankVolume', 'remainingTankVolume',
+        fields = ('name', 'description', 'active', 'sleepTime', 'activeTime', "maxContainerVolume",
+                  "remainingContainerVolume",
                   'maxBatteryCapacity', 'remainingBatteryCapacity', 'power', 'throughput', 'operatingVoltage',
                   'needsService')
 
@@ -99,8 +100,8 @@ class PumpModelForm(forms.ModelForm):
         if not super(PumpModelForm, self).is_valid():
             return False
 
-        if self.cleaned_data['remainingTankVolume'] > self.cleaned_data['maxTankVolume']:
-            self._errors['remainingTankVolume'] = [
+        if self.cleaned_data["remainingContainerVolume"] > self.cleaned_data["maxContainerVolume"]:
+            self._errors['remainingContainerVolume'] = [
                 'Remaining water volume can not be greater than maximal water volume']
             return False
 

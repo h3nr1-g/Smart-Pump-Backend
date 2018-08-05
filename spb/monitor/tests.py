@@ -12,8 +12,8 @@ def create_pumps():
         activeTime=10,
         description='foobar',
         name='cheeseburger',
-        remainingTankVolume=12,
-        maxTankVolume=120,
+        remainingContainerVolume=12,
+        maxContainerVolume=120,
         throughput=2.5,
         power=2.5,
         remainingBatteryCapacity=2000,
@@ -28,8 +28,8 @@ def create_pumps():
         activeTime=10,
         description='foobar',
         name='moep-moep',
-        remainingTankVolume=None,
-        maxTankVolume=None,
+        remainingContainerVolume=None,
+        maxContainerVolume=None,
         throughput=2.5,
         power=2.5,
         remainingBatteryCapacity=None,
@@ -53,6 +53,7 @@ class OverViewTest(TestCase):
     """
     Test class for the view class OverView
     """
+
     def setUp(self):
         create_pumps()
         create_activities()
@@ -66,7 +67,6 @@ class OverViewTest(TestCase):
         self.assertFalse('Service Required' in response.content.decode())
         for pump in Pump.objects.all():
             self.assertTrue(pump.name in response.content.decode())
-
 
     def test_get_all_deactivated(self):
         for pump in Pump.objects.all():
@@ -84,6 +84,7 @@ class PumpDetailsViewTest(WebTest):
     """
     Test class for the view class PumpDetailsView
     """
+
     def setUp(self):
         create_pumps()
         create_activities()
@@ -102,18 +103,18 @@ class PumpDetailsViewTest(WebTest):
 
     def test_delete_valid_pump(self):
         pid = Pump.objects.all()[0].id
-        self.assertTrue(len(Pump.objects.filter(pk=pid))==1)
+        self.assertTrue(len(Pump.objects.filter(pk=pid)) == 1)
         response = self.client.delete(reverse('monitor:pump_details', args=[pid]))
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(Pump.objects.filter(pk=pid)) == 0)
 
     def test_post_invalid_pump(self):
-        response = self.client.post(reverse('monitor:pump_details',args=[1234]))
+        response = self.client.post(reverse('monitor:pump_details', args=[1234]))
         self.assertEqual(response.status_code, 404)
 
     def test_post_empty_data(self):
         pid = Pump.objects.all()[0].id
-        response = self.client.post(reverse('monitor:pump_details',args=[pid]),{})
+        response = self.client.post(reverse('monitor:pump_details', args=[pid]), {})
         self.assertEqual(response.status_code, 400)
 
     def test_post_valid_change(self):
@@ -129,7 +130,7 @@ class PumpDetailsViewTest(WebTest):
     def test_post_invalid_capacity_change(self):
         pump = Pump.objects.all()[0]
         form = self.app.get(reverse('monitor:pump_details', args=[pump.id])).form
-        form['remainingBatteryCapacity'] = pump.maxBatteryCapacity +1
+        form['remainingBatteryCapacity'] = pump.maxBatteryCapacity + 1
         response = form.submit(status=400)
         self.assertEqual(response.status_code, 400)
         self.assertTrue('Remaining capacity can not be greater' in response.content.decode())
@@ -137,7 +138,7 @@ class PumpDetailsViewTest(WebTest):
     def test_post_invalid_volume_change(self):
         pump = Pump.objects.all()[0]
         form = self.app.get(reverse('monitor:pump_details', args=[pump.id])).form
-        form['remainingTankVolume'] = pump.maxTankVolume +1
+        form['remainingContainerVolume'] = pump.maxContainerVolume + 1
         response = form.submit(status=400)
         self.assertEqual(response.status_code, 400)
         self.assertTrue('Remaining water volume can not be greater' in response.content.decode())
@@ -163,7 +164,7 @@ class NewPumpViewTest(WebTest):
         response = form.submit().follow()
         self.assertEqual(response.status_code, 200)
         pumps = Pump.objects.filter(name='Foobar12345')
-        self.assertEqual(len(pumps),1)
+        self.assertEqual(len(pumps), 1)
 
 
 class SignalTest(TestCase):
@@ -173,4 +174,3 @@ class SignalTest(TestCase):
 
     def setUp(self):
         create_pumps()
-

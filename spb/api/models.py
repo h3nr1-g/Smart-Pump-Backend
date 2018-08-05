@@ -24,9 +24,9 @@ class Pump(models.Model):
     # Timestamp of the last request
     lastRequest = models.DateTimeField(auto_now=True)
     # Remaining volume of the water tank in liters
-    remainingTankVolume = models.FloatField(null=True)
+    remainingContainerVolume = models.FloatField(null=True)
     # Max volume of the water tank in liters
-    maxTankVolume = models.FloatField(null=True)
+    maxContainerVolume = models.FloatField(null=True)
     # Throughput of this pump in liters per second
     throughput = models.FloatField(null=True)
     # Electrical power of the pump in Watts
@@ -62,9 +62,9 @@ class Pump(models.Model):
             self.remainingBatteryCapacity -= ((self.power * active) / self.operatingVoltage) * (5 / 18)
             # calculate energy consumption of the ESP during the request and active time
             self.remainingBatteryCapacity += 0.1 * (active + 4) * (5 / 18)
-        if self.remainingTankVolume is not None:
+        if self.remainingContainerVolume is not None:
             # calculate amount of pumped water
-            self.remainingTankVolume -= self.throughput * active
+            self.remainingContainerVolume -= self.throughput * active
         # update status values
         self.save()
 
@@ -79,11 +79,12 @@ class Pump(models.Model):
         """
 
         if self.remainingBatteryCapacity is not None and \
-                        self.remainingBatteryCapacity <= self.maxBatteryCapacity * LOW_RESOURCE_THRESHHOLD:
+                self.remainingBatteryCapacity <= self.maxBatteryCapacity * LOW_RESOURCE_THRESHHOLD:
             self.needsService = True
             ServiceTask.objects.create(pump=self, task=LOW_BATTERY_SERVICE_TASK)
-        if self.remainingTankVolume is not None and \
-                        self.remainingTankVolume <= self.maxTankVolume * LOW_RESOURCE_THRESHHOLD:
+
+        if self.remainingContainerVolume is not None and \
+                self.remainingContainerVolume <= self.maxContainerVolume * LOW_RESOURCE_THRESHHOLD:
             self.needsService = True
             ServiceTask.objects.create(pump=self, task=LOW_WATER_SERVICE_TASK)
         self.save()
