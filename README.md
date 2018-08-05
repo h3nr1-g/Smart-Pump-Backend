@@ -10,7 +10,7 @@ for the clients in order to fetch all relevant information e.g. the duration of 
 **Smart Pump Backend contains NO USER AND DEVICE AUTHENTICATION at the moment. This will be implemented in the future.**
 
 ## Required Python Packages
-### For Development & Testing (see pip/dev.pip)
+### For Development & Testing (see requirements/dev.txt)
 * coverage
 * Django
 * django-bootstrap4
@@ -21,7 +21,7 @@ for the clients in order to fetch all relevant information e.g. the duration of 
 * flake8
 * pylint
 
-### For Production Use (see pip/productive.pip)
+### For Execution (see requirements/runtime.txt)
 * Django
 * django-bootstrap4
 * django-tables2
@@ -31,7 +31,7 @@ for the clients in order to fetch all relevant information e.g. the duration of 
 ```
 git clone https://github.com/h3nr1-g/Smart-Pump-Backend.git
 cd Smart-Pump-Backend
-pip install -r pip/dev.pip
+pip install -r requirements/dev.txt
 cd spb
 python manage.py makemigrations --settings=spb.settings.dev api monitor && python migrate
 python manage.py test --settings=spb.settings.dev && python manage.py runserver --settings=spb.settings.dev
