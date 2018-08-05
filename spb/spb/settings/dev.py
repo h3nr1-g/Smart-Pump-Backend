@@ -17,11 +17,3 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
-
-INSTALLED_APPS += ['django_jenkins']
-
-# django jenkins configuration / task list
-JENKINS_TASKS = (
-    'django_jenkins.tasks.run_pep8',
-    'django_jenkins.tasks.run_pylint',
-)

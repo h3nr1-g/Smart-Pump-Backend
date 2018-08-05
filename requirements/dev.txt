@@ -2,7 +2,6 @@
 coverage
 django-webtest
 pytest
-django-jenkins
 flake8
-pylint==1.9
+pylint
 pep8
