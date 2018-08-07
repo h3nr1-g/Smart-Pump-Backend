@@ -146,7 +146,7 @@ class TokenView(View):
             token.delete()
         except Token.DoesNotExist:
             pass
-        finally:
-            return JsonResponse({
-                'token': Token.objects.create(user=request.user).key
-            })
+
+        return JsonResponse({
+            'token': Token.objects.create(user=request.user).key
+        })

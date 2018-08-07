@@ -171,18 +171,18 @@ class LoginView(View):
             'form': LoginForm(request.POST)
         }
 
-        if context['form'].is_valid():
-            user = authenticate(username=context['form'].cleaned_data['username'],
-                                password=context['form'].cleaned_data['password'])
-            if user is not None:
-                login(request, user)
-                return HttpResponseRedirect(reverse('monitor:overview'))
-            else:
-                template = loader.get_template('monitor/login.html')
-                return HttpResponseForbidden(template.render(context, request))
-        else:
+        if not context['form'].is_valid():
             template = loader.get_template('monitor/login.html')
             return HttpResponseBadRequest(template.render(context, request))
+
+        user = authenticate(username=context['form'].cleaned_data['username'],
+                            password=context['form'].cleaned_data['password'])
+        if user is None:
+            template = loader.get_template('monitor/login.html')
+            return HttpResponseForbidden(template.render(context, request))
+
+        login(request, user)
+        return HttpResponseRedirect(reverse('monitor:overview'))
 
 
 class LogoutView(View):

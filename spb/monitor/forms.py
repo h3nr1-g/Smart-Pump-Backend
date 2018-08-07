@@ -131,35 +131,35 @@ class PumpModelForm(forms.ModelForm):
         max_battery = self.cleaned_data['maxBatteryCapacity']
 
         if (remaining_vol is not None and max_vol is not None) and remaining_vol > max_vol:
-                self._errors['remainingContainerVolume'] = [
-                    'Remaining container volume can not be greater than maximum container volume'
-                ]
-                return False
+            self._errors['remainingContainerVolume'] = [
+                'Remaining container volume can not be greater than maximum container volume'
+            ]
+            return False
         elif remaining_vol is None and max_vol is not None:
-                self._errors['remainingContainerVolume'] = [
-                    'Remaining water volume can not be empty when a value for the maximum container volume is set'
-                ]
-                return False
+            self._errors['remainingContainerVolume'] = [
+                'Remaining water volume can not be empty when a value for the maximum container volume is set'
+            ]
+            return False
         elif remaining_vol is not None and max_vol is None:
-                self._errors['maxContainerVolume'] = [
-                    'Maximum container volume can not be empty when a value for the remaining container volume is set'
-                ]
-                return False
+            self._errors['maxContainerVolume'] = [
+                'Maximum container volume can not be empty when a value for the remaining container volume is set'
+            ]
+            return False
 
         if (remaining_battery is not None and max_battery is not None) and remaining_battery > max_battery:
-                self._errors['remainingBatteryCapacity'] = [
-                    'Remaining battery capacity can not be greater than maximum battery capacity'
-                ]
-                return False
+            self._errors['remainingBatteryCapacity'] = [
+                'Remaining battery capacity can not be greater than maximum battery capacity'
+            ]
+            return False
         elif remaining_battery is None and max_battery is not None:
-                self._errors['remainingBatteryCapacity'] = [
-                    'Remaining battery capacity can not be empty when a value for the maximum battery capacity is set'
-                ]
-                return False
+            self._errors['remainingBatteryCapacity'] = [
+                'Remaining battery capacity can not be empty when a value for the maximum battery capacity is set'
+            ]
+            return False
         elif remaining_battery is not None and max_battery is None:
-                self._errors['maxBatteryCapacity'] = [
-                    'Maximum battery capacity can not be empty when a value for the remaining battery capacity is set'
-                ]
-                return False
+            self._errors['maxBatteryCapacity'] = [
+                'Maximum battery capacity can not be empty when a value for the remaining battery capacity is set'
+            ]
+            return False
 
         return True
