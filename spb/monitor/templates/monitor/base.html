@@ -21,6 +21,7 @@
     <link href="{% static "monitor/css/bootstrap.min.css" %}" rel="stylesheet">
     <script src="{% static "monitor/js/jquery.min.js" %}"></script>
     <script src="{% static "monitor/js/csrf.js"%}"></script>
+      <script src="{% static "monitor/js/token.js"%}"></script>
 
     {% block head %}
 
@@ -59,7 +60,11 @@
     <script src="{% static "monitor/js/bootstrap.bundle.min.js" %}"></script>
     <script src="{% static "monitor/js/ajax_delete_reload.js" %}"></script>
     <script src="{% static "monitor/js/csrf.js" %}"></script>
-
+    {%if request.user.is_authenticated %}
+    <script>
+        get_token("{% url 'api:token' %}");
+    </script>
+    {% endif %}
   </body>
 
 </html>

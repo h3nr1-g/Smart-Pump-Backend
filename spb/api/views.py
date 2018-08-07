@@ -3,6 +3,8 @@ from django.http import JsonResponse, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views import View
+from rest_framework.authtoken.models import Token
+
 from api.models import Pump, TransmittedTiming, ServiceTask
 from monitor.decorators import user_is_authenticated
 
@@ -112,3 +114,39 @@ class ServiceTaskView(View):
             raise PermissionDenied()
         task.delete()
         return HttpResponse()
+
+
+@method_decorator(user_is_authenticated, name='dispatch')
+class TokenView(View):
+    """
+    View class for the retrieval and update of an user authentication token
+    """
+
+    def get(self, request):
+        """
+        Handler method for GET requests
+
+        :param request: Request object instance
+        :return: Json response with the current token
+        """
+
+        return JsonResponse({
+            'token': get_object_or_404(Token, user=request.user).key
+        })
+
+    def post(self, request):
+        """
+        Handler method for POST requests
+
+        :param request: Request object instance
+        :return: JSON response with new authentication response
+        """
+        try:
+            token = Token.objects.get(user=request.user)
+            token.delete()
+        except Token.DoesNotExist:
+            pass
+        finally:
+            return JsonResponse({
+                'token': Token.objects.create(user=request.user).key
+            })

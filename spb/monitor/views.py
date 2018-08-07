@@ -29,7 +29,6 @@ class OverView(View):
         context = {
             'table': PumpTable(Pump.objects.filter(owner=request.user)),
             'title': 'Pump Overview',
-            'token': Token.objects.get(user=request.user).key
         }
         return render(request, 'monitor/overview.html', context)
 

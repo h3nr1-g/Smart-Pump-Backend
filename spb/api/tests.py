@@ -4,6 +4,8 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 from django.test import TestCase
 from django.urls import reverse
+from rest_framework.authtoken.models import Token
+
 from api.models import Pump, ServiceTask
 from monitor.tests import create_pumps, create_user, create_activities
 
@@ -26,13 +28,13 @@ class ServiceTaskViewTest(TestCase):
         )
 
     def test_unauthorized_delete(self):
-        response = self.client.delete(reverse('api:service_task', args=[self.task.id]))
+        response = self.client.delete(reverse('api:service_tasks', args=[self.task.id]))
         self.assertEqual(response.status_code, 403)
 
     def test_authorized_delete(self):
         self.assertGreater(len(ServiceTask.objects.all()), 0)
         self.client.login(username=self.username, password=self.password)
-        response = self.client.delete(reverse('api:service_task', args=[self.task.id]))
+        response = self.client.delete(reverse('api:service_tasks', args=[self.task.id]))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(ServiceTask.objects.all()), 0)
 
@@ -139,3 +141,35 @@ class TimingsViewTest(TestCase):
         self.assertTrue(isinstance(data, dict))
         self.assertIn('active', data)
         self.assertIn('sleep', data)
+
+
+class TokenViewTest(TestCase):
+    """
+    test class for the view class TokenView
+    """
+
+    def setUp(self):
+        self.username, self.password = create_user()
+
+    def test_unauthorized_get(self):
+        response = self.client.get(reverse('api:token'))
+        self.assertEqual(response.status_code, 403)
+
+    def test_authorized_get(self):
+        self.client.login(username=self.username, password=self.password)
+        response = self.client.get(reverse('api:token'))
+        self.assertEqual(response.status_code, 200)
+        token = json.loads(response.content.decode())
+        self.assertEqual(token['token'], Token.objects.get(user=User.objects.get(username=self.username)).key)
+
+    def test_unauthorized_post(self):
+        response = self.client.post(reverse('api:token'))
+        self.assertEqual(response.status_code, 403)
+
+    def test_authorized_post(self):
+        self.client.login(username=self.username, password=self.password)
+        old_token = Token.objects.get(user=User.objects.get(username=self.username)).key
+        response = self.client.post(reverse('api:token'))
+        self.assertEqual(response.status_code, 200)
+        token = json.loads(response.content.decode())
+        self.assertNotEqual(old_token, token['token'])
