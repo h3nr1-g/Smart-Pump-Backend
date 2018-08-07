@@ -1,7 +1,5 @@
 -r runtime.txt
 coverage
 django-webtest
-pytest
-flake8
 pylint
-pep8
+pycodestyle

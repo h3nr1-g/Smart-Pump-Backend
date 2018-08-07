@@ -7,22 +7,23 @@ Smart Pump Backend is the back end component of this autonomous watering system.
 for the clients in order to fetch all relevant information e.g. the duration of a pump cycle and the timespan between to cycles. The web application has also a built-in monitoring function and shows you the "health status" of your pump.   
 
 ## Disclaminer
-**Smart Pump Backend contains NO USER AND DEVICE AUTHENTICATION at the moment. This will be implemented in the future.**
+**DO NOT USE for critical infrastructure.**
 
 ## Required Python Packages
 ### For Development & Testing (see requirements/dev.txt)
 * coverage
 * Django
+* djangorestframework
 * django-bootstrap4
 * django-tables2
 * django-webtest
 * django-jenkins
-* pytest
-* flake8
+* pycodestyle
 * pylint
 
 ### For Execution (see requirements/runtime.txt)
 * Django
+* djangorestframework
 * django-bootstrap4
 * django-tables2
 
@@ -33,6 +34,7 @@ git clone https://github.com/h3nr1-g/Smart-Pump-Backend.git
 cd Smart-Pump-Backend
 pip install -r requirements/dev.txt
 cd spb
-python manage.py makemigrations --settings=spb.settings.dev api monitor && python migrate
+python manage.py makemigrations --settings=spb.settings.dev api monitor && python manage.py migrate --settings=spb.settings.dev 
+python manage.py createsuperuser --settings=spb.settings.dev 
 python manage.py test --settings=spb.settings.dev && python manage.py runserver --settings=spb.settings.dev
 ```

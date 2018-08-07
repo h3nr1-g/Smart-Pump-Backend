@@ -1,13 +1,14 @@
 import json
 
+from django.contrib.auth.models import User
+from django.db.models import Q
 from django.test import TestCase
 from django.urls import reverse
+from api.models import Pump, ServiceTask
+from monitor.tests import create_pumps, create_user, create_activities
 
-from api.models import Pump, ServiceTask, TransmittedTiming
-from monitor.tests import create_pumps, create_activities
 
-
-class ServiceTaskViewTask(TestCase):
+class ServiceTaskViewTest(TestCase):
     """
     Test class for the view class ServiceTaskView
     """
@@ -15,77 +16,126 @@ class ServiceTaskViewTask(TestCase):
     def setUp(self):
         create_pumps()
         self.pump = Pump.objects.all()[0]
-        for _ in range(2):
-            ServiceTask.objects.create(pump=self.pump, task='foo')
-        self.pump.needsService = True
+        self.username, self.password = create_user()
+        self.user = User.objects.get(username=self.username)
+        self.pump.owner = self.user
+        self.pump.save()
+        self.task = ServiceTask.objects.create(
+            task='Foobar',
+            pump=self.pump
+        )
+
+    def test_unauthorized_delete(self):
+        response = self.client.delete(reverse('api:service_task', args=[self.task.id]))
+        self.assertEqual(response.status_code, 403)
+
+    def test_authorized_delete(self):
+        self.assertGreater(len(ServiceTask.objects.all()), 0)
+        self.client.login(username=self.username, password=self.password)
+        response = self.client.delete(reverse('api:service_task', args=[self.task.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(ServiceTask.objects.all()), 0)
+
+
+class TransmittedTimingsViewTest(TestCase):
+    """
+    test class for the view class TransmittedTimingsView
+    """
+
+    def setUp(self):
+        create_pumps()
+        create_activities()
+        self.pump = Pump.objects.all()[0]
+        self.username, self.password = create_user()
+        self.user = User.objects.get(username=self.username)
+        self.pump.owner = self.user
         self.pump.save()
 
-    def test_delete(self):
-        self.assertTrue(self.pump.needsService)
-        for task in ServiceTask.objects.filter(pump=self.pump):
-            response = self.client.delete(reverse('api:service_task', args=[task.id]))
-            self.assertEqual(response.status_code, 200)
-        self.assertFalse(Pump.objects.get(pk=self.pump.id).needsService)
+    def test_unauthorized_get(self):
+        response = self.client.get(reverse('api:transmitted_timings', args=[self.pump.id]))
+        self.assertEqual(response.status_code, 403)
+
+    def test_get_foreign_timings(self):
+        self.client.login(username=self.username, password=self.password)
+        pump = Pump.objects.filter(~Q(owner=self.user))[0]
+        response = self.client.get(reverse('api:transmitted_timings', args=[pump.id]))
+        self.assertEqual(response.status_code, 403)
+
+    def test_get_transmitted_timings(self):
+        self.client.login(username=self.username, password=self.password)
+        response = self.client.get(reverse('api:transmitted_timings', args=[self.pump.id]))
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.content.decode())
+        self.assertTrue('data' in data)
+        self.assertTrue(isinstance(data['data'], list))
+        self.assertGreater(len(data['data']), 0)
+        for element in data['data']:
+            self.assertTrue('timeStamp' in element)
+            self.assertTrue('active' in element)
+            self.assertTrue('sleep' in element)
+
+
+class TimingAggregatorViewTest(TestCase):
+    """
+    test class for the view class TimingAggregatorView
+    """
+
+    def setUp(self):
+        create_pumps()
+        create_activities()
+        self.pump = Pump.objects.all()[0]
+        self.username, self.password = create_user()
+        self.user = User.objects.get(username=self.username)
+        self.pump.owner = self.user
+        self.pump.save()
+
+    def test_unauthorized_get(self):
+        response = self.client.get(reverse('api:timings_aggregation'))
+        self.assertEqual(response.status_code, 403)
+
+    def test_get_timing_aggregations(self):
+        self.client.login(username=self.username, password=self.password)
+        response = self.client.get(reverse('api:timings_aggregation'))
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.content.decode())
+        self.assertTrue('data' in data)
+        self.assertTrue(isinstance(data['data'], list))
+        self.assertGreater(len(data['data']), 0)
+        foreign_pump = Pump.objects.get(~Q(owner=self.user))
+        for element in data['data']:
+            self.assertTrue('timeStamp' in element)
+            self.assertTrue(self.pump.name in element)
+            self.assertFalse(foreign_pump.name in element)
 
 
 class TimingsViewTest(TestCase):
     """
-    Test class for the view method TimingsView
+    test class for the view class TimingsView
     """
 
     def setUp(self):
         create_pumps()
+        self.pump = Pump.objects.all()[0]
+        self.username, self.password = create_user()
+        self.user = User.objects.get(username=self.username)
+        self.pump.owner = self.user
+        self.pump.save()
 
-    def test_get(self):
-        old_len = len(TransmittedTiming.objects.all())
-        pump = Pump.objects.all()[0]
+    def test_unauthorized_get(self):
+        response = self.client.get(reverse('api:timings', args=[self.pump.id]))
+        self.assertEqual(response.status_code, 403)
+
+    def test_get_foreign_timings(self):
+        self.client.login(username=self.username, password=self.password)
+        pump = Pump.objects.filter(~Q(owner=self.user))[0]
         response = self.client.get(reverse('api:timings', args=[pump.id]))
+        self.assertEqual(response.status_code, 403)
+
+    def test_get_timings(self):
+        self.client.login(username=self.username, password=self.password)
+        response = self.client.get(reverse('api:timings', args=[self.pump.id]))
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.content.decode())
-        self.assertTrue('active' in data.keys())
-        self.assertTrue('sleep' in data.keys())
-        self.assertNotEqual(len(TransmittedTiming.objects.all()), old_len)
-
-
-class ActivityAggregatorViewTest(TestCase):
-    """
-    Test class for the view class ActivitiyAggregatorView
-    """
-
-    def setUp(self):
-        create_pumps()
-        create_activities()
-
-    def test_get(self):
-        response = self.client.get(reverse('api:timings_aggregation'))
-        self.assertEqual(response.status_code, 200)
-        data = json.loads(response.content.decode())
-        fields = ['xkey', 'ykeys', 'labels', 'data']
-        for f in fields:
-            self.assertTrue(f in data)
-        for pump in Pump.objects.all():
-            self.assertTrue(pump.name in data['labels'])
-
-        self.assertTrue(isinstance(data['data'], list))
-        for element in data['data']:
-            self.assertTrue('timeStamp' in element)
-
-
-class PumpActivityViewTest(TestCase):
-    """
-    Test class for PumpActivityView view class
-    """
-
-    def setUp(self):
-        create_pumps()
-        create_activities()
-
-    def test_get(self):
-        pump = Pump.objects.all()[0]
-        response = self.client.get(reverse('api:transmitted_timings', args=[pump.id]))
-        self.assertEqual(response.status_code, 200)
-        data = json.loads(response.content.decode())
-        fields = ['xkey', 'ykeys', 'labels', 'data']
-        for f in fields:
-            self.assertTrue(f in data)
-        self.assertTrue(len(data['data']) > 0)
+        self.assertTrue(isinstance(data, dict))
+        self.assertIn('active', data)
+        self.assertIn('sleep', data)

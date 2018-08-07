@@ -23,6 +23,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_tables2',
     'bootstrap4',
+    'rest_framework',
+    'rest_framework.authtoken',
 ] + PROJECT_APPS
 
 

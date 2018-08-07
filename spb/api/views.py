@@ -1,9 +1,13 @@
+from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import get_object_or_404
+from django.utils.decorators import method_decorator
 from django.views import View
 from api.models import Pump, TransmittedTiming, ServiceTask
+from monitor.decorators import user_is_authenticated
 
 
+@method_decorator(user_is_authenticated, name='dispatch')
 class TimingsView(View):
     """
     View class is used for the activation of a pump, pumps controller fetches data from this view on a regular base
@@ -18,6 +22,9 @@ class TimingsView(View):
         :return: JSON dictionary with values for stand by and working time
         """
         pump = get_object_or_404(Pump, pk=pid)
+        if pump.owner != request.user:
+            raise PermissionDenied()
+
         active = pump.activeTime if pump.active and not pump.needsService else 0
         sleep = pump.sleepTime
         if active > 0:
@@ -31,6 +38,7 @@ class TimingsView(View):
         })
 
 
+@method_decorator(user_is_authenticated, name='dispatch')
 class TimingAggregatorView(View):
     """
     View class for the aggregation of the activities by all pumps
@@ -44,7 +52,7 @@ class TimingAggregatorView(View):
         :return:  JSON dictionary with a list of all logged and transmitted pump timings
         """
         data = []
-        for e in TransmittedTiming.objects.filter(activeTime__gt=0):
+        for e in TransmittedTiming.objects.filter(activeTime__gt=0, pump__owner=request.user):
             data.append({
                 'timeStamp': e.timeStamp,
                 e.pump.name.replace(' ', '_'): e.activeTime
@@ -59,6 +67,7 @@ class TimingAggregatorView(View):
         })
 
 
+@method_decorator(user_is_authenticated, name='dispatch')
 class TransmittedTimingsView(View):
     def get(self, request, pid):
         """
@@ -69,6 +78,9 @@ class TransmittedTimingsView(View):
         :return:  JSON dictionary with a list of all logged and transmitted pump timings for one specific pump
         """
         pump = get_object_or_404(Pump, pk=pid)
+        if pump.owner != request.user:
+            raise PermissionDenied()
+
         data = []
         for e in TransmittedTiming.objects.filter(activeTime__gt=0, pump=pump).order_by('timeStamp'):
             data.append({'timeStamp': e.timeStamp, 'active': e.activeTime, 'sleep': e.sleepTime})
@@ -81,9 +93,10 @@ class TransmittedTimingsView(View):
         })
 
 
+@method_decorator(user_is_authenticated, name='dispatch')
 class ServiceTaskView(View):
     """
-    View class for the deletion,retrieval and modificaton of a service task
+    View class for the deletion,retrieval and modification of a service task
     """
 
     def delete(self, request, tid):
@@ -94,5 +107,8 @@ class ServiceTaskView(View):
         :param tid: Task ID
         :return: Empty 200-OK response in case on success
         """
-        get_object_or_404(ServiceTask, pk=tid).delete()
+        task = get_object_or_404(ServiceTask, pk=tid)
+        if task.pump.owner != request.user:
+            raise PermissionDenied()
+        task.delete()
         return HttpResponse()

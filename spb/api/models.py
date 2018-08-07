@@ -18,29 +18,32 @@ class Pump(models.Model):
     # Pump time in seconds
     activeTime = models.PositiveIntegerField(default=2)
     # Description
-    description = models.TextField(null=True, blank=True)
+    description = models.TextField(null=True, blank=True, default=None)
     # Name of this pump
-    name = models.CharField(blank=False, null=False, max_length=200, unique=True)
+    name = models.CharField(blank=False, null=False, max_length=200)
     # Timestamp of the last request
     lastRequest = models.DateTimeField(auto_now=True)
     # Remaining volume of the water tank in liters
-    remainingContainerVolume = models.FloatField(null=True)
+    remainingContainerVolume = models.FloatField(null=True, default=None)
     # Max volume of the water tank in liters
-    maxContainerVolume = models.FloatField(null=True)
+    maxContainerVolume = models.FloatField(null=True, default=None)
     # Throughput of this pump in liters per second
-    throughput = models.FloatField(null=True)
+    throughput = models.FloatField(null=True, default=None)
     # Electrical power of the pump in Watts
-    power = models.FloatField(null=True)
+    power = models.FloatField(null=True, default=None)
     # Remaining capacity of the battery in mAh
-    remainingBatteryCapacity = models.PositiveIntegerField(default=0, null=True)
+    remainingBatteryCapacity = models.PositiveIntegerField(default=None, null=True)
     # Max capacity of the battery in mAh
-    maxBatteryCapacity = models.PositiveIntegerField(default=0, null=True)
+    maxBatteryCapacity = models.PositiveIntegerField(default=None, null=True)
     # Operating voltage of the pump
-    operatingVoltage = models.FloatField(null=True)
+    operatingVoltage = models.FloatField(null=True, default=None)
     # Bool flag for the indication if refilling of water or recharging of the battery is necessary
     needsService = models.BooleanField(default=False)
     # foreign key to the owner
     owner = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+
+    class Meta:
+        unique_together = ('owner', 'name')
 
     def __str__(self):
         return str(self.name)
