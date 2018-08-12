@@ -1,0 +1,34 @@
+version: '3'
+
+services:
+  gunicorn:
+    build: ./gunicorn 
+    image: spb-gunicorn
+    ports: 
+        - "8000:8000"
+    volumes: 
+        - "static:/opt/spb/spb/static"   
+    networks:
+      spb_net:
+        ipv4_address: 172.28.0.10
+
+  nginx:
+    image: spb-nginx
+    build: ./nginx
+    ports: 
+        - "80:80"
+    volumes:
+        - "static:/var/www/static"
+    networks:
+      spb_net:
+ 
+volumes:
+    static:   
+
+networks:
+  spb_net:
+    ipam:
+        driver: default
+        config:
+            - subnet: 172.28.0.0/24    
+
