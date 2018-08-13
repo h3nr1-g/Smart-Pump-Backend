@@ -19,7 +19,7 @@ docker-compose up
 Open the link http://localhost/monitor/login
 
 
-## Dummy Credentials
+## Admin Credentials
 ```
 User: admin
 Password: admin123456789
