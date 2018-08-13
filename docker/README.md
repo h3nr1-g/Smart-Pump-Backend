@@ -8,7 +8,7 @@ The example consists of two docker containers:
 
   * **gunicorn**: This container is used as an application server. For the provision of the application logic the WSGI HTTP server gunicorn (http://gunicorn.org/) is used.
 
-## Run Example
+## Start Example
 
 Open a shell:
 ```
