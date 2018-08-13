@@ -1,4 +1,4 @@
-# Deployment Example
+# Docker Compose Example
 
 ## Description
 This folder contains a Docker (Compose) based deployment example.
